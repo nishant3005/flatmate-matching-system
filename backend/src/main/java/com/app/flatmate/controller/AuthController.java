@@ -55,6 +55,8 @@ public class AuthController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
         User user = userService.findByEmail(req.getEmail());
+        user.setLastActiveAt(java.time.LocalDateTime.now());
+        userService.save(user);
         return ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(user.getEmail()),
                 user.getId(), user.getName(), user.getEmail()));
     }

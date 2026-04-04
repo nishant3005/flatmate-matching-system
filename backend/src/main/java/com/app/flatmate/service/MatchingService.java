@@ -20,13 +20,16 @@ public class MatchingService {
     private final PreferenceRepository preferenceRepository;
     private final MatchRepository matchRepository;
     private final ObjectMapper objectMapper;
+    private final RankingService rankingService;
 
     public MatchingService(PreferenceRepository preferenceRepository,
                            MatchRepository matchRepository,
-                           ObjectMapper objectMapper) {
+                           ObjectMapper objectMapper,
+                           RankingService rankingService) {
         this.preferenceRepository = preferenceRepository;
         this.matchRepository = matchRepository;
         this.objectMapper = objectMapper;
+        this.rankingService = rankingService;
     }
 
     @Transactional
@@ -46,14 +49,17 @@ public class MatchingService {
         candidates.removeIf(p -> !budgetOverlaps(myPref, p));
 
         // Score all candidates
-        record Scored(Preference pref, double score, List<String> reasons) {}
+        record Scored(Preference pref, double rawScore, double finalRank, List<String> reasons) {}
         List<Scored> scored = new ArrayList<>();
         for (Preference cp : candidates) {
             List<String> reasons = new ArrayList<>();
-            double score = MatchingAlgorithm.computeScore(myPref, cp, reasons);
-            scored.add(new Scored(cp, score, reasons));
+            double rawScore = MatchingAlgorithm.computeScore(myPref, cp, reasons);
+            if (rawScore >= 33.0) {
+                double finalRank = rankingService.computeRankingScore(rawScore, cp.getUser());
+                scored.add(new Scored(cp, rawScore, finalRank, reasons));
+            }
         }
-        scored.sort(Comparator.comparingDouble(Scored::score).reversed());
+        scored.sort(Comparator.comparingDouble(Scored::finalRank).reversed());
 
         // Delete old matches, save new top-20
         matchRepository.deleteByUser(currentUser);
@@ -64,7 +70,7 @@ public class MatchingService {
             Match saved = matchRepository.save(Match.builder()
                     .user(currentUser)
                     .matchedUser(s.pref().getUser())
-                    .score(s.score())
+                    .score(s.rawScore())
                     .reasons(reasonsJson)
                     .build());
             responses.add(toResponse(saved, s.reasons(), s.pref().getCity()));
