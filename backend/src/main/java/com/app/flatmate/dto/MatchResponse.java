@@ -10,11 +10,12 @@ public class MatchResponse {
     private Double score;
     private List<String> reasons;
     private String city;
+    private java.time.LocalDateTime lastActiveAt;
 
     public MatchResponse() {}
 
     public MatchResponse(Long matchId, Long matchedUserId, String matchedUserName,
-                         String matchedUserEmail, Double score, List<String> reasons, String city) {
+                         String matchedUserEmail, Double score, List<String> reasons, String city, java.time.LocalDateTime lastActiveAt) {
         this.matchId = matchId;
         this.matchedUserId = matchedUserId;
         this.matchedUserName = matchedUserName;
@@ -22,6 +23,7 @@ public class MatchResponse {
         this.score = score;
         this.reasons = reasons;
         this.city = city;
+        this.lastActiveAt = lastActiveAt;
     }
 
     public Long getMatchId() { return matchId; }
@@ -38,4 +40,6 @@ public class MatchResponse {
     public void setReasons(List<String> reasons) { this.reasons = reasons; }
     public String getCity() { return city; }
     public void setCity(String city) { this.city = city; }
+    public java.time.LocalDateTime getLastActiveAt() { return lastActiveAt; }
+    public void setLastActiveAt(java.time.LocalDateTime lastActiveAt) { this.lastActiveAt = lastActiveAt; }
 }

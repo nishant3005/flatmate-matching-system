@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Moon, Sparkles, Heart, DollarSign, Utensils, Briefcase, Users, ChevronRight, ChevronLeft, Check } from 'lucide-react'
@@ -36,6 +36,21 @@ export default function OnboardingPage() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    api.get('/preferences/me')
+      .then(res => {
+        if (res.data) {
+          setForm({
+            ...INIT,
+            ...res.data,
+            smoking: res.data.smoking !== undefined ? String(res.data.smoking) : '',
+            drinking: res.data.drinking !== undefined ? String(res.data.drinking) : '',
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const change = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 

@@ -96,7 +96,8 @@ public class MatchingService {
                 m.getMatchedUser().getEmail(),
                 m.getScore(),
                 reasons,
-                city != null ? city : ""
+                city != null ? city : "",
+                m.getMatchedUser().getLastActiveAt()
         );
     }
 

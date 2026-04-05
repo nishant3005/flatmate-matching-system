@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapPin, CheckCircle, XCircle } from 'lucide-react'
+import { MapPin, CheckCircle, XCircle, Clock } from 'lucide-react'
 import ScoreIndicator from './ScoreIndicator'
 
 export default function MatchCard({ match, index }) {
   const navigate = useNavigate()
-  const { matchId, matchedUserName, matchedUserEmail, score, reasons = [], city } = match
+  const { matchId, matchedUserName, matchedUserEmail, score, reasons = [], city, lastActiveAt } = match
 
   // Split reasons into positive and flags
   const positives = reasons.filter(r => !r.toLowerCase().includes('mismatch') && !r.toLowerCase().includes('different') && !r.toLowerCase().includes('no '))
@@ -13,6 +13,10 @@ export default function MatchCard({ match, index }) {
 
   const initials = matchedUserName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
   const colors   = ['from-primary-600 to-primary-400', 'from-accent-600 to-accent-400', 'from-purple-600 to-pink-400']
+  
+  const formattedActiveTime = lastActiveAt 
+    ? new Date(lastActiveAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : 'Unknown'
 
   return (
     <motion.div
@@ -32,11 +36,16 @@ export default function MatchCard({ match, index }) {
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-white text-lg leading-tight">{matchedUserName}</h3>
           <p className="text-white/40 text-sm truncate">{matchedUserEmail}</p>
-          {city && (
-            <div className="flex items-center gap-1 mt-1 text-white/50 text-xs">
-              <MapPin size={11} /> {city}
-            </div>
-          )}
+          <div className="flex items-center gap-3 mt-1 text-white/50 text-xs">
+            {city && (
+              <span className="flex items-center gap-1">
+                <MapPin size={11} /> {city}
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <Clock size={11} /> Active: {formattedActiveTime}
+            </span>
+          </div>
 
           {/* Reasons preview */}
           <div className="flex flex-wrap gap-1.5 mt-3">

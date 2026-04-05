@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, CheckCircle, XCircle, User, MapPin } from 'lucide-react'
+import { ArrowLeft, CheckCircle, XCircle, User, MapPin, Clock } from 'lucide-react'
 import api from '../api/axios'
 import Navbar from '../components/Navbar'
 import ScoreIndicator from '../components/ScoreIndicator'
@@ -62,6 +62,9 @@ export default function MatchDetailPage() {
   if (!match) return null
 
   const initials = match.matchedUserName?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) || '?'
+  const formattedActiveTime = match.lastActiveAt
+    ? new Date(match.lastActiveAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : 'Unknown'
 
   return (
     <div className="min-h-screen bg-page">
@@ -82,12 +85,17 @@ export default function MatchDetailPage() {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <h1 className="text-2xl font-bold text-white">{match.matchedUserName}</h1>
-              <p className="text-white/50 text-sm">{match.matchedUserEmail}</p>
-              {match.city && (
-                <div className="flex items-center gap-1 mt-1 justify-center sm:justify-start text-white/40 text-sm">
-                  <MapPin size={13} /> {match.city}
-                </div>
-              )}
+              <p className="text-white/50 text-sm mb-1">{match.matchedUserEmail}</p>
+              <div className="flex flex-wrap items-center gap-4 mt-1 justify-center sm:justify-start text-white/40 text-sm">
+                {match.city && (
+                  <span className="flex items-center gap-1">
+                    <MapPin size={13} /> {match.city}
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  <Clock size={13} /> Active: {formattedActiveTime}
+                </span>
+              </div>
             </div>
             <div className="flex-shrink-0">
               <ScoreIndicator score={Math.round(match.score)} size={100} />
